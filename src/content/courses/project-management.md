@@ -10,7 +10,6 @@ description: >
   certifications.
 totalHours: "108 instructional hours (3 courses x 36 hours)"
 deliveryMethod: "Online"
-level: "All Levels"
 order: 2
 featured: true
 audience:

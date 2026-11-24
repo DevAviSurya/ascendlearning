@@ -16,7 +16,10 @@ const courses = (await getCollection('courses')).sort((a, b) => a.data.order - b
     <SectionHeading
       eyebrow="Certificate Programs"
       title="Three courses. One certificate. Delivered online."
-      description={`Each program is delivered as three 12-week courses at $${FEE_PER_COURSE_USD} USD per course. Complete all three to earn your Certificate of Completion. Payment accepted via ${PAYMENT_METHODS.join(', ')}.`}
+      description={[
+        `Each course is delivered over a period of 12 weeks. Learners can enroll in a single course or more than one course within a semester. Learn at a pace that is convenient for you at $${FEE_PER_COURSE_USD} USD per course. Complete all three to earn your Certificate of Completion. Payment accepted via ${PAYMENT_METHODS.join(', ')}.`,
+        'Learners who enroll in all 3 courses within a program for a semester are eligible for a 10% fee discount for each of the courses registered.',
+      ]}
     />
 
     <div class="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">

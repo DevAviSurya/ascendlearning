@@ -10,17 +10,24 @@ interface Props {
 }
 
 const { eyebrow, title, description, primaryCta, secondaryCta } = Astro.props;
+const [eyebrowFirstWord, ...eyebrowRestWords] = eyebrow.split(' ');
+const eyebrowRest = eyebrowRestWords.join(' ');
 ---
 
 <section class="relative overflow-hidden bg-brand-900">
   <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_theme(colors.brand.700),_transparent_60%)]"></div>
 
   <div class="relative mx-auto max-w-6xl px-6 py-24 text-center lg:px-8 lg:py-32">
-    <p class="text-sm font-semibold uppercase tracking-widest text-accent-400">{eyebrow}</p>
-    <h1 class="mx-auto mt-4 max-w-3xl text-4xl tracking-tight text-white sm:text-5xl lg:text-6xl">
+    <p class="text-3xl font-semibold uppercase text-accent-400 sm:text-5xl lg:text-6xl">
+      <!-- {eyebrowFirstWord}
+      <br class="hidden lg:inline" />{' '}
+      {eyebrowRest} -->
+      {eyebrow}
+    </p>
+    <h1 class="mx-auto mt-4 max-w-3xl text-lg tracking-tight text-white sm:text-2xl lg:text-2xl">
       {title}
     </h1>
-    <p class="mx-auto mt-6 max-w-2xl text-lg text-brand-100">{description}</p>
+    <p class="mx-auto mt-6 max-w-2xl text-sm tracking-wide text-brand-100">{description}</p>
 
     {
       (primaryCta || secondaryCta) && (

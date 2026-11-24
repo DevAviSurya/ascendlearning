@@ -2,19 +2,24 @@
 interface Props {
   eyebrow?: string;
   title: string;
-  description?: string;
+  description?: string | string[];
   align?: 'left' | 'center';
 }
 
 const { eyebrow, title, description, align = 'left' } = Astro.props;
+const paragraphs = Array.isArray(description) ? description : description ? [description] : [];
 ---
 
-<div class={align === 'center' ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl'}>
+<div class={align === 'center' ? 'mx-auto max-w-3xl text-center' : 'max-w-3xl'}>
   {
     eyebrow && (
       <p class="text-sm font-semibold uppercase tracking-wide text-brand-600">{eyebrow}</p>
     )
   }
   <h2 class="mt-2 text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">{title}</h2>
-  {description && <p class="mt-4 text-lg text-slate-600">{description}</p>}
+  {
+    paragraphs.map((paragraph) => (
+      <p class="mt-4 text-base text-slate-700">{paragraph}</p>
+    ))
+  }
 </div>

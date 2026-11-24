@@ -8,7 +8,6 @@ description: >
   International Institute of Business Analysis (IIBA) and the BABOK Guide.
 totalHours: "108 instructional hours (3 courses x 36 hours)"
 deliveryMethod: "Online"
-level: "All Levels"
 order: 1
 featured: true
 audience:

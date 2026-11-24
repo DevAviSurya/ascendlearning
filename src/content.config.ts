@@ -13,7 +13,6 @@ const courses = defineCollection({
     description: z.string(),
     totalHours: z.string(),
     deliveryMethod: z.string(),
-    level: z.enum(['Foundation', 'Intermediate', 'Advanced', 'All Levels']),
     order: z.number(),
     featured: z.boolean().default(false),
     audience: z.array(z.string()),

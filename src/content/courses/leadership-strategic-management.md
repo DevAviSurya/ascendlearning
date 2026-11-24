@@ -8,7 +8,6 @@ description: >
   focused courses.
 totalHours: "108 instructional hours (3 courses x 36 hours)"
 deliveryMethod: "Online"
-level: "Intermediate"
 order: 3
 featured: true
 audience:
