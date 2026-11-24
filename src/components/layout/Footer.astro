@@ -1,0 +1,59 @@
+---
+import { Image } from 'astro:assets';
+import { CONTACT_EMAIL, CONTACT_PHONE, NAV_LINKS, SITE_TITLE } from '../../consts';
+import logo from '../../assets/logo.png';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-slate-100 bg-slate-50">
+  <div class="mx-auto max-w-6xl px-6 py-12 lg:px-8">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+      <div>
+        <Image src={logo} alt={SITE_TITLE} width={176} class="h-auto w-44" />
+        <p class="mt-4 text-sm text-slate-600">
+          Professional training and strategic leadership development in Business Analysis,
+          Project Management, and Leadership &amp; Strategic Management.
+        </p>
+      </div>
+
+      <div>
+        <p class="text-sm font-semibold text-slate-900">Site</p>
+        <ul class="mt-3 space-y-2">
+          {
+            NAV_LINKS.map((link) => (
+              <li>
+                <a href={link.href} class="text-sm text-slate-600 hover:text-brand-600">
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div>
+        <p class="text-sm font-semibold text-slate-900">Programs</p>
+        <ul class="mt-3 space-y-2">
+          <li><a href="/courses/business-analysis/" class="text-sm text-slate-600 hover:text-brand-600">Business Analysis</a></li>
+          <li><a href="/courses/project-management/" class="text-sm text-slate-600 hover:text-brand-600">Project Management</a></li>
+          <li><a href="/courses/leadership-strategic-management/" class="text-sm text-slate-600 hover:text-brand-600">Leadership &amp; Strategic Management</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="text-sm font-semibold text-slate-900">Contact</p>
+        <ul class="mt-3 space-y-2 text-sm text-slate-600">
+          <li><a href={`mailto:${CONTACT_EMAIL}`} class="hover:text-brand-600">{CONTACT_EMAIL}</a></li>
+          {CONTACT_PHONE && (
+            <li><a href={`tel:${CONTACT_PHONE.replace(/[^+\d]/g, '')}`} class="hover:text-brand-600">{CONTACT_PHONE}</a></li>
+          )}
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-10 border-t border-slate-200 pt-6 text-sm text-slate-500">
+      &copy; {year} {SITE_TITLE}. All rights reserved.
+    </div>
+  </div>
+</footer>

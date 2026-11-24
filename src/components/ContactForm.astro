@@ -1,0 +1,111 @@
+---
+import Button from './ui/Button.astro';
+
+// Configure in a .env file (see .env.example): a form backend such as
+// Formspree (https://formspree.io), Web3Forms (https://web3forms.com), or a
+// Google Apps Script Web App bound to a Google Sheet for request tracking.
+// The form degrades to a plain POST with no JavaScript required. Fields
+// (name, email, phone, reason for contacting) match the client's requested
+// Google Sheet tracking columns.
+const formEndpoint = import.meta.env.PUBLIC_FORM_ENDPOINT || '';
+---
+
+<form id="contact-form" method="POST" action={formEndpoint || '#'} class="space-y-6" novalidate>
+  {!formEndpoint && (
+    <p class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+      Form backend not configured yet.
+    </p>
+    // <p> Set <code>PUBLIC_FORM_ENDPOINT</code> in your
+    //   <code>.env</code> file. See <code>.env.example</code>.</p>
+  )}
+
+  <!-- Honeypot field to deter simple spam bots -->
+  <input type="text" name="company" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+
+  <div class="grid gap-6 sm:grid-cols-2">
+    <div>
+      <label for="name" class="text-sm font-medium text-slate-900">Name</label>
+      <input
+        id="name"
+        name="name"
+        type="text"
+        required
+        class="mt-2 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+      />
+    </div>
+    <div>
+      <label for="email" class="text-sm font-medium text-slate-900">Email</label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        required
+        class="mt-2 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+      />
+    </div>
+  </div>
+
+  <div>
+    <label for="phone" class="text-sm font-medium text-slate-900">Phone number</label>
+    <input
+      id="phone"
+      name="phone"
+      type="tel"
+      class="mt-2 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+    />
+  </div>
+
+  <div>
+    <label for="reason" class="text-sm font-medium text-slate-900">Reason for contacting</label>
+    <textarea
+      id="reason"
+      name="reason"
+      rows="5"
+      required
+      placeholder="e.g. I'd like more information about the Certificate in Business Analysis."
+      class="mt-2 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+    ></textarea>
+  </div>
+
+  <Button type="submit" variant="primary">Send message</Button>
+
+  <p id="form-status" class="hidden text-sm" role="status"></p>
+</form>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement | null;
+  const status = document.getElementById('form-status');
+
+  form?.addEventListener('submit', async (event) => {
+    const action = form.getAttribute('action');
+    if (!action || action === '#') return;
+
+    event.preventDefault();
+    if (status) {
+      status.className = 'text-sm text-slate-600';
+      status.textContent = 'Sending...';
+      status.classList.remove('hidden');
+    }
+
+    try {
+      const response = await fetch(action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+      });
+
+      if (!response.ok) throw new Error('Request failed');
+
+      form.reset();
+      if (status) {
+        status.className = 'text-sm text-green-700';
+        status.textContent = "Thanks! Your message has been sent — we'll be in touch shortly.";
+      }
+    } catch {
+      if (status) {
+        status.className = 'text-sm text-red-700';
+        status.textContent = 'Something went wrong. Please try again or email us directly.';
+      }
+    }
+  });
+</script>

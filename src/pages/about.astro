@@ -1,0 +1,97 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '../layouts/Layout.astro';
+import SectionHeading from '../components/ui/SectionHeading.astro';
+import Button from '../components/ui/Button.astro';
+import { TRAINER_NAME, TRAINER_CREDENTIALS, TRAINER_TITLE } from '../consts';
+import trainerPhoto from '../assets/christel-mbonteh.png';
+
+const credentials = ['Ph.D., Organizational Leadership', 'MSc., Applied Economics', 'PMP®'];
+
+const experience = [
+  {
+    title: 'Consulting & Business Analysis',
+    description:
+      'Over 12 years of experience in consulting, business analysis, and organizational transformation.',
+  },
+  {
+    title: 'Change Management',
+    description: 'Over nine years of experience leading organizational change management initiatives.',
+  },
+  {
+    title: 'Academic Foundation',
+    description:
+      'A Ph.D. in Organizational Leadership (specializing in Entrepreneurial Leadership), an MSc. in Applied Economics, and a PMP certification combine academic excellence with practical industry expertise.',
+  },
+];
+
+---
+
+<Layout
+  title="About Your Trainer"
+  description={`Meet ${TRAINER_NAME}, Founder & Managing Director of Ascend Professional Institute.`}
+>
+  <section class="mx-auto max-w-6xl px-6 py-20 lg:px-8">
+    <div class="grid items-start gap-12 lg:grid-cols-[1fr_1.4fr]">
+      <div class="flex flex-col items-center gap-6 rounded-2xl bg-white p-8 text-center lg:items-start lg:text-left">
+        <div class="h-40 w-40 overflow-hidden rounded-full bg-brand-600">
+          <Image
+            src={trainerPhoto}
+            alt={`${TRAINER_NAME}, ${TRAINER_TITLE}`}
+            width={480}
+            class="h-full w-full object-cover object-top"
+          />
+        </div>
+        <div>
+          <p class="text-xl font-bold text-slate-800">{TRAINER_NAME}, {TRAINER_CREDENTIALS}</p>
+          <p class="text-sm text-slate-600">{TRAINER_TITLE}</p>
+        </div>
+        <div class="flex flex-wrap justify-center gap-2 lg:justify-start">
+          {
+            credentials.map((credential) => (
+              <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-100">
+                {credential}
+              </span>
+            ))
+          }
+        </div>
+        <Button href="/contact/" variant="primary" class="w-full justify-center lg:w-auto">
+          Book a Session
+        </Button>
+      </div>
+
+      <div>
+        <SectionHeading
+          eyebrow="Our Leadership"
+          title="Training that comes from real consulting and leadership experience"
+          description={`${TRAINER_NAME} is a seasoned consultant and leadership professional combining academic excellence with practical industry expertise.`}
+        />
+
+        <div class="mt-10 space-y-8">
+          {
+            experience.map((item) => (
+              <div class="border-l-2 border-brand-200 pl-6">
+                <h3 class="text-lg font-semibold text-slate-900">{item.title}</h3>
+                <p class="mt-2 text-slate-600">{item.description}</p>
+              </div>
+            ))
+          }
+        </div>
+
+        <div class="mt-10 rounded-2xl bg-brand-50 p-6">
+          <p class="text-slate-700">
+            Driven by a passion for developing people and strengthening organizations,
+            {' '}{TRAINER_NAME} founded <strong>Ascend Professional Institute</strong> to empower
+            individuals, professionals, and organizations through professional training and
+            strategic leadership development. The mission is to build competence, elevate
+            excellence, and advance careers through knowledge, innovation, and transformative
+            leadership.
+          </p>
+          <p class="mt-3 text-sm font-semibold text-brand-700">
+            — {TRAINER_NAME}, {TRAINER_TITLE}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

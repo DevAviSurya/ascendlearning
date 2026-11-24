@@ -1,0 +1,29 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { FEE_PER_COURSE_USD } from '../consts';
+
+interface Props {
+  course: CollectionEntry<'courses'>;
+}
+
+const { course } = Astro.props;
+const { title, tagline, totalHours, level } = course.data;
+---
+
+<article class="flex flex-col rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-md">
+  <span class="inline-flex w-fit items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
+    {level}
+  </span>
+  <h3 class="mt-4 text-xl font-bold text-slate-900">{title}</h3>
+  <p class="mt-2 flex-1 text-sm text-slate-600">{tagline}</p>
+
+  <div class="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+    <div class="text-sm text-slate-500">
+      <p>{totalHours}</p>
+      <p class="font-semibold text-slate-700">${FEE_PER_COURSE_USD} USD / course</p>
+    </div>
+    <a href={`/courses/${course.id}/`} class="text-sm font-semibold text-brand-600 hover:text-brand-700">
+      View program &rarr;
+    </a>
+  </div>
+</article>

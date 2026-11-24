@@ -1,0 +1,125 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import ModuleAccordion from '../../components/ModuleAccordion.astro';
+import Button from '../../components/ui/Button.astro';
+import { FEE_PER_COURSE_USD, PAYMENT_METHODS, SEMESTERS } from '../../consts';
+
+export async function getStaticPaths() {
+  const courses = await getCollection('courses');
+  return courses.map((course) => ({
+    params: { slug: course.id },
+    props: { course },
+  }));
+}
+
+const { course } = Astro.props;
+const { title, tagline, description, totalHours, deliveryMethod, level, audience, outcomes, modules } =
+  course.data;
+const { Content } = await render(course);
+
+const totalFeeUSD = FEE_PER_COURSE_USD * modules.length;
+---
+
+<Layout title={title} description={tagline}>
+  <section class="bg-brand-900">
+    <div class="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+      <a href="/courses/" class="text-sm font-medium text-brand-200 hover:text-white">&larr; All programs</a>
+      <span class="mt-6 inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-accent-400">
+        {level}
+      </span>
+      <h1 class="mt-4 max-w-3xl text-4xl font-bold text-white sm:text-5xl">{title}</h1>
+      <p class="mt-4 max-w-2xl text-lg text-brand-100">{tagline}</p>
+
+      <dl class="mt-8 flex flex-wrap gap-8 text-sm text-brand-100">
+        <div>
+          <dt class="font-semibold text-white">Total duration</dt>
+          <dd class="mt-1">{totalHours}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-white">Delivery</dt>
+          <dd class="mt-1">{deliveryMethod}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-white">Fee</dt>
+          <dd class="mt-1">${FEE_PER_COURSE_USD} USD per course (${totalFeeUSD} USD total)</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="mx-auto grid max-w-6xl gap-12 px-6 py-16 lg:grid-cols-[1.4fr_1fr] lg:px-8">
+    <div>
+      <div class="prose prose-slate max-w-none text-slate-600">
+        <p>{description}</p>
+        <Content />
+      </div>
+
+      <h2 class="mt-12 text-2xl font-bold text-slate-900">Program courses</h2>
+      <p class="mt-2 text-slate-600">
+        This program is delivered across three 12-week courses. All three courses must be
+        completed to earn the Certificate of Completion.
+      </p>
+      <div class="mt-6">
+        <ModuleAccordion modules={modules} />
+      </div>
+    </div>
+
+    <aside class="space-y-8">
+      <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <h3 class="text-sm font-semibold text-slate-900">Who it's for</h3>
+        <ul class="mt-4 space-y-2">
+          {audience.map((item) => <li class="text-sm text-slate-600">{item}</li>)}
+        </ul>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <h3 class="text-sm font-semibold text-slate-900">What you'll walk away with</h3>
+        <ul class="mt-4 space-y-2">
+          {
+            outcomes.map((item) => (
+              <li class="flex items-start gap-2 text-sm text-slate-600">
+                <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                {item}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <h3 class="text-sm font-semibold text-slate-900">Enrollment details</h3>
+        <dl class="mt-4 space-y-3 text-sm text-slate-600">
+          <div>
+            <dt class="font-medium text-slate-900">Semesters offered</dt>
+            <dd class="mt-0.5">{SEMESTERS.join(', ')}</dd>
+          </div>
+          <div>
+            <dt class="font-medium text-slate-900">Cohort dates</dt>
+            <dd class="mt-0.5">To be announced &mdash; contact us for the next start date.</dd>
+          </div>
+          <div>
+            <dt class="font-medium text-slate-900">Accepted payment methods</dt>
+            <dd class="mt-0.5">{PAYMENT_METHODS.join(', ')}</dd>
+          </div>
+          <div>
+            <dt class="font-medium text-slate-900">Certificate</dt>
+            <dd class="mt-0.5">
+              Awarded on completion of all three courses in this program.
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <Button href="/contact/" variant="primary" class="w-full justify-center">
+        Enquire About This Program
+      </Button>
+    </aside>
+  </section>
+</Layout>

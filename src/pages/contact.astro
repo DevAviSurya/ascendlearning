@@ -1,0 +1,42 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SectionHeading from '../components/ui/SectionHeading.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { CONTACT_EMAIL, CONTACT_PHONE } from '../consts';
+---
+
+<Layout
+  title="Contact Us"
+  description="Get in touch to request information about our certificate programs or consulting services."
+>
+  <section class="mx-auto max-w-6xl px-6 py-20 lg:px-8">
+    <div class="grid gap-12 lg:grid-cols-[1fr_1.4fr]">
+      <div>
+        <SectionHeading
+          eyebrow="Contact Us"
+          title="Let's talk about your training needs"
+          description="Whether it's a certificate program, a corporate training session, or consulting and mentorship, send a message and we'll get back to you."
+        />
+
+        <dl class="mt-10 space-y-6">
+          <div>
+            <dt class="text-sm font-semibold text-slate-900">Email</dt>
+            <dd class="mt-1 text-slate-600">
+              <a href={`mailto:${CONTACT_EMAIL}`} class="hover:text-brand-600">{CONTACT_EMAIL}</a>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-semibold text-slate-900">Phone</dt>
+            <dd class="mt-1 text-slate-600">
+              {CONTACT_PHONE || 'Coming soon'}
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+        <ContactForm />
+      </div>
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import SectionHeading from '../../components/ui/SectionHeading.astro';
+import CourseCard from '../../components/CourseCard.astro';
+import { FEE_PER_COURSE_USD, PAYMENT_METHODS } from '../../consts';
+
+const courses = (await getCollection('courses')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Layout
+  title="Programs"
+  description="Certificate programs in Business Analysis, Project Management, and Leadership & Strategic Management."
+>
+  <section class="mx-auto max-w-6xl px-6 py-20 lg:px-8">
+    <SectionHeading
+      eyebrow="Certificate Programs"
+      title="Three courses. One certificate. Delivered online."
+      description={`Each program is delivered as three 12-week courses at $${FEE_PER_COURSE_USD} USD per course. Complete all three to earn your Certificate of Completion. Payment accepted via ${PAYMENT_METHODS.join(', ')}.`}
+    />
+
+    <div class="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {courses.map((course) => <CourseCard course={course} />)}
+    </div>
+  </section>
+</Layout>
