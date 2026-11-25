@@ -4,9 +4,12 @@ import Button from './ui/Button.astro';
 // Configure in a .env file (see .env.example): a form backend such as
 // Formspree (https://formspree.io), Web3Forms (https://web3forms.com), or a
 // Google Apps Script Web App bound to a Google Sheet for request tracking.
-// The form degrades to a plain POST with no JavaScript required. Fields
-// (name, email, phone, reason for contacting) match the client's requested
-// Google Sheet tracking columns.
+// The form degrades to a plain POST with no JavaScript required (native
+// `required`/`pattern`/`minlength`/`maxlength` constraints still apply via
+// the browser's built-in validation). With JavaScript it progressively
+// enhances to a validated `fetch` submission with inline status/error text.
+// Fields (name, email, phone, reason for contacting) match the client's
+// requested Google Sheet tracking columns.
 const formEndpoint = import.meta.env.PUBLIC_FORM_ENDPOINT || '';
 ---
 
@@ -15,33 +18,50 @@ const formEndpoint = import.meta.env.PUBLIC_FORM_ENDPOINT || '';
     <p class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
       Form backend not configured yet.
     </p>
-    // <p> Set <code>PUBLIC_FORM_ENDPOINT</code> in your
-    //   <code>.env</code> file. See <code>.env.example</code>.</p>
   )}
 
-  <!-- Honeypot field to deter simple spam bots -->
-  <input type="text" name="company" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+  <!-- Honeypot field to deter simple spam bots: kept off-screen rather than
+       display:none, which is enough to catch naive bots without being an
+       obvious "display:none" tell for ones that sniff for it. Real users
+       never see or fill it. -->
+  <div class="absolute -left-[9999px] top-0 h-px w-px overflow-hidden opacity-0" aria-hidden="true">
+    <input type="text" name="company" tabindex="-1" autocomplete="off" />
+  </div>
 
   <div class="grid gap-6 sm:grid-cols-2">
     <div>
-      <label for="name" class="text-sm font-medium text-slate-900">Name</label>
+      <label for="name" class="text-sm font-medium text-slate-900">
+        Name <span aria-hidden="true" class="text-red-600">*</span>
+      </label>
       <input
         id="name"
         name="name"
         type="text"
+        autocomplete="name"
         required
+        minlength="2"
+        maxlength="100"
+        pattern="[A-Za-zÀ-ɏ' .-]{2,100}"
+        aria-describedby="name-error"
         class="mt-2 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
       />
+      <p id="name-error" class="mt-1 hidden text-xs text-red-600" role="alert"></p>
     </div>
     <div>
-      <label for="email" class="text-sm font-medium text-slate-900">Email</label>
+      <label for="email" class="text-sm font-medium text-slate-900">
+        Email <span aria-hidden="true" class="text-red-600">*</span>
+      </label>
       <input
         id="email"
         name="email"
         type="email"
+        autocomplete="email"
         required
+        maxlength="254"
+        aria-describedby="email-error"
         class="mt-2 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
       />
+      <p id="email-error" class="mt-1 hidden text-xs text-red-600" role="alert"></p>
     </div>
   </div>
 
@@ -51,61 +71,212 @@ const formEndpoint = import.meta.env.PUBLIC_FORM_ENDPOINT || '';
       id="phone"
       name="phone"
       type="tel"
+      inputmode="tel"
+      autocomplete="tel"
+      maxlength="16"
+      pattern="\+?[0-9]{7,15}"
+      aria-describedby="phone-error"
       class="mt-2 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
     />
+    <p id="phone-error" class="mt-1 hidden text-xs text-red-600" role="alert"></p>
   </div>
 
   <div>
-    <label for="reason" class="text-sm font-medium text-slate-900">Reason for contacting</label>
+    <label for="reason" class="text-sm font-medium text-slate-900">
+      Reason for contacting <span aria-hidden="true" class="text-red-600">*</span>
+    </label>
     <textarea
       id="reason"
       name="reason"
       rows="5"
       required
+      minlength="10"
+      maxlength="2000"
       placeholder="e.g. I'd like more information about the Certificate in Business Analysis."
+      aria-describedby="reason-error"
       class="mt-2 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
     ></textarea>
+    <p id="reason-error" class="mt-1 hidden text-xs text-red-600" role="alert"></p>
   </div>
 
   <Button type="submit" variant="primary">Send message</Button>
 
-  <p id="form-status" class="hidden text-sm" role="status"></p>
+  <p id="form-status" class="hidden text-sm" role="status" aria-live="polite"></p>
 </form>
 
 <script>
+  type FieldName = 'name' | 'email' | 'phone' | 'reason';
+
   const form = document.getElementById('contact-form') as HTMLFormElement | null;
   const status = document.getElementById('form-status');
+  const submitButton = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
 
-  form?.addEventListener('submit', async (event) => {
-    const action = form.getAttribute('action');
-    if (!action || action === '#') return;
+  // Timestamp the form became interactive. A submission that arrives
+  // implausibly fast is almost certainly scripted, not a person reading the
+  // page first.
+  const renderedAt = Date.now();
 
-    event.preventDefault();
-    if (status) {
-      status.className = 'text-sm text-slate-700';
-      status.textContent = 'Sending...';
-      status.classList.remove('hidden');
+  const FIELDS: FieldName[] = ['name', 'email', 'phone', 'reason'];
+
+  const PATTERNS: Partial<Record<FieldName, RegExp>> = {
+    name: /^[A-Za-zÀ-ɏ' .-]{2,100}$/,
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+    phone: /^\+?[0-9]{7,15}$/,
+  };
+
+  const MESSAGES: Record<FieldName, string> = {
+    name: 'Enter a valid name (letters only, 2–100 characters).',
+    email: 'Enter a valid email address.',
+    phone: 'Enter a valid phone number: digits only, optional leading + for country code (7–15 digits total).',
+    reason: 'Please provide at least 10 characters describing your request.',
+  };
+
+  function fieldEl(name: FieldName) {
+    return form?.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | null | undefined;
+  }
+
+  function errorEl(name: FieldName) {
+    return document.getElementById(`${name}-error`);
+  }
+
+  function setFieldError(name: FieldName, message: string | null) {
+    const input = fieldEl(name);
+    const error = errorEl(name);
+    if (!input || !error) return;
+
+    if (message) {
+      input.setAttribute('aria-invalid', 'true');
+      error.textContent = message;
+      error.classList.remove('hidden');
+    } else {
+      input.removeAttribute('aria-invalid');
+      error.textContent = '';
+      error.classList.add('hidden');
+    }
+  }
+
+  function validateField(name: FieldName): boolean {
+    const input = fieldEl(name);
+    if (!input) return true;
+
+    const value = input.value.trim();
+    const isOptional = name === 'phone';
+
+    if (value === '') {
+      if (isOptional) {
+        setFieldError(name, null);
+        return true;
+      }
+      setFieldError(name, 'This field is required.');
+      return false;
     }
 
+    const pattern = PATTERNS[name];
+    if (pattern && !pattern.test(value)) {
+      setFieldError(name, MESSAGES[name]);
+      return false;
+    }
+
+    if (name === 'reason' && value.length < 10) {
+      setFieldError(name, MESSAGES.reason);
+      return false;
+    }
+
+    setFieldError(name, null);
+    return true;
+  }
+
+  function setStatus(message: string, tone: 'info' | 'success' | 'error') {
+    if (!status) return;
+    const colors: Record<typeof tone, string> = {
+      info: 'text-slate-700',
+      success: 'text-green-700',
+      error: 'text-red-700',
+    };
+    status.className = `text-sm ${colors[tone]}`;
+    status.textContent = message;
+    status.classList.remove('hidden');
+  }
+
+  for (const name of FIELDS) {
+    const input = fieldEl(name);
+    input?.addEventListener('blur', () => validateField(name));
+    input?.addEventListener('input', () => {
+      if (input.getAttribute('aria-invalid') === 'true') validateField(name);
+    });
+  }
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const results = FIELDS.map((name) => ({ name, valid: validateField(name) }));
+    const firstInvalid = results.find((result) => !result.valid);
+    if (firstInvalid) {
+      fieldEl(firstInvalid.name)?.focus();
+      return;
+    }
+
+    // Spam heuristics: a filled honeypot or a submission faster than a human
+    // could plausibly read the form and type into it. Report success
+    // without sending anything, rather than revealing that a trap fired.
+    const honeypot = form.elements.namedItem('company') as HTMLInputElement | null;
+    const looksAutomated = Boolean(honeypot?.value) || Date.now() - renderedAt < 1500;
+    if (looksAutomated) {
+      form.reset();
+      setStatus("Thanks! Your message has been sent — we'll be in touch shortly.", 'success');
+      return;
+    }
+
+    const action = form.getAttribute('action');
+    if (!action || action === '#') {
+      setStatus('This form is not yet configured. Please email us directly.', 'error');
+      return;
+    }
+
+    submitButton?.setAttribute('disabled', 'true');
+    setStatus('Sending...', 'info');
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     try {
+      const formData = new FormData(form);
+      for (const name of FIELDS) {
+        const value = formData.get(name);
+        if (typeof value === 'string') formData.set(name, value.trim());
+      }
+
       const response = await fetch(action, {
         method: 'POST',
-        body: new FormData(form),
+        body: formData,
         headers: { Accept: 'application/json' },
+        signal: controller.signal,
       });
 
-      if (!response.ok) throw new Error('Request failed');
+      // Some backends (e.g. a Google Apps Script Web App) always answer
+      // with HTTP 200 and signal failure in the JSON body instead, so a
+      // body-level `ok: false` overrides a 200 status when present.
+      let payload: { ok?: boolean; message?: string } | null = null;
+      try {
+        payload = await response.json();
+      } catch {
+        payload = null;
+      }
+
+      const succeeded = payload?.ok ?? response.ok;
+      if (!succeeded) throw new Error(payload?.message || 'Request failed');
 
       form.reset();
-      if (status) {
-        status.className = 'text-sm text-green-700';
-        status.textContent = "Thanks! Your message has been sent — we'll be in touch shortly.";
-      }
-    } catch {
-      if (status) {
-        status.className = 'text-sm text-red-700';
-        status.textContent = 'Something went wrong. Please try again or email us directly.';
-      }
+      setStatus(payload?.message || "Thanks! Your message has been sent — we'll be in touch shortly.", 'success');
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message && err.message !== 'Request failed'
+          ? err.message
+          : 'Something went wrong. Please try again or email us directly.';
+      setStatus(message, 'error');
+    } finally {
+      clearTimeout(timeoutId);
+      submitButton?.removeAttribute('disabled');
     }
   });
 </script>
