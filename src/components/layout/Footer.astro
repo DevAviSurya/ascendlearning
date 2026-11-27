@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
-import { CONTACT_EMAIL, CONTACT_PHONE, NAV_LINKS, SITE_TITLE } from '../../consts';
+import { Icon } from 'astro-icon/components';
+import { CONTACT_EMAIL, CONTACT_PHONE, LINKEDIN_URL, NAV_LINKS, SITE_TITLE } from '../../consts';
 import logo from '../../assets/logo.png';
 
 const year = new Date().getFullYear();
@@ -48,6 +49,18 @@ const year = new Date().getFullYear();
           {CONTACT_PHONE && (
             <li><a href={`tel:${CONTACT_PHONE.replace(/[^+\d]/g, '')}`} class="hover:text-brand-600">{CONTACT_PHONE}</a></li>
           )}
+          <li>
+            <a
+              href={LINKEDIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 hover:text-brand-600"
+              aria-label="Ascend Professional Institute on LinkedIn"
+            >
+              <Icon name="simple-icons:linkedin" class="h-4 w-4 shrink-0 text-[#0A66C2]" />
+              LinkedIn
+            </a>
+          </li>
         </ul>
       </div>
     </div>
