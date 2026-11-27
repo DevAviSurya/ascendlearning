@@ -1,0 +1,95 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { CONTACT_EMAIL, SITE_TITLE } from '../consts';
+
+const lastUpdated = 'November 27, 2026';
+---
+
+<Layout title="Privacy Policy" description={`How ${SITE_TITLE} collects, uses, and protects your information.`}>
+  <section class="mx-auto max-w-3xl px-6 py-20 lg:px-8">
+    <h1 class="text-3xl font-bold text-slate-900">Privacy Policy</h1>
+    <p class="mt-2 text-sm text-slate-500">Last updated: {lastUpdated}</p>
+
+    <div class="mt-10 space-y-8 text-slate-700">
+      <p>
+        This Privacy Policy explains how {SITE_TITLE} ("we", "us", "our") collects, uses, and
+        protects information when you visit this website or contact us through it.
+      </p>
+
+      <div>
+        <h2 class="text-xl font-semibold text-slate-900">Information we collect</h2>
+        <p class="mt-2">
+          We only collect personal information that you choose to provide to us directly, through
+          the Contact Us form on this site. That form asks for your name, email address, phone
+          number (optional), and the reason for contacting us. We do not use cookies, analytics,
+          or tracking technologies on this website, and we do not require you to create an account
+          to browse it.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-semibold text-slate-900">How we use your information</h2>
+        <p class="mt-2">
+          We use the information you submit to respond to your enquiry, provide details about our
+          certificate programs or consulting services, and keep a record of enquiries so we can
+          follow up with you. We do not use your information for any other purpose, and we do not
+          sell or rent it to third parties.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-semibold text-slate-900">How your submission is processed</h2>
+        <p class="mt-2">
+          Contact form submissions are delivered through a third-party form-processing service
+          configured for this site (such as a form backend provider or a connected spreadsheet) so
+          that we can receive and track enquiries. That provider only receives the information you
+          submit in the form, and only to deliver it to us.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-semibold text-slate-900">Data retention</h2>
+        <p class="mt-2">
+          We retain contact submissions for as long as reasonably necessary to respond to your
+          enquiry and maintain a record of our communications with you.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-semibold text-slate-900">Your rights</h2>
+        <p class="mt-2">
+          You may ask us to access, correct, or delete the personal information you have submitted
+          to us by contacting us using the details below.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-semibold text-slate-900">Children's privacy</h2>
+        <p class="mt-2">
+          Our programs and services are intended for working professionals and adult learners. We
+          do not knowingly collect personal information from children.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-semibold text-slate-900">Changes to this policy</h2>
+        <p class="mt-2">
+          We may update this Privacy Policy from time to time. The "Last updated" date at the top
+          of this page reflects the most recent revision.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-semibold text-slate-900">Contact us</h2>
+        <p class="mt-2">
+          If you have questions about this Privacy Policy or how your information is handled,
+          contact us at{' '}
+          <a href={`mailto:${CONTACT_EMAIL}`} class="font-semibold text-brand-600 hover:text-brand-700">
+            {CONTACT_EMAIL}
+          </a>{' '}
+          or via the <a href="/contact/" class="font-semibold text-brand-600 hover:text-brand-700">Contact Us</a> page.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>
